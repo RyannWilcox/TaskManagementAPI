@@ -16,24 +16,21 @@ services:
       timeout: 5s
       retries: 5
 
-  #database-migrations:
-  #  image: migrate/migrate
-  #  depends_on:
-  #      postgres-db:
-  #        condition: service_healthy
-  #  volumes:
-  #      - ./database-migrations/migrations:/migrations
-  #  command: ["-path", "/migrations", "-database", "postgres://taskmanager:c6fec46d49164d95aa60d4d26fffc877@postgres-db:5432/taskmanager?sslmode=disable", "-verbose", "up"]
+  database-migrations:
+    image: migrate/migrate
+    depends_on:
+        postgres-db:
+          condition: service_healthy
+    volumes:
+        - ./database-migrations/migrations:/migrations
+    command: ["-path", "/migrations", "-database", "postgres://taskmanager:c6fec46d49164d95aa60d4d26fffc877@postgres-db:5432/taskmanager?sslmode=disable", "-verbose", "up"]
 
   backend:
     build: .
     ports:
       - "8080:8080"
-    depends_on:      
-      postgres-db:
-        condition: service_healthy
-    #depends_on:
-    #  - database-migrations
+    depends_on:
+      - database-migrations
     environment:
       - DB_HOST=postgres-db
       - DB_PORT=5432
