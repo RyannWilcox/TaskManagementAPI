@@ -25,18 +25,29 @@ func (h *RegisterHandler) Registration(c *gin.Context) {
 	// Implement the registration logic here
 	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+		c.JSON(http.StatusBadRequest, utils.HTTPError{
+			Code:    http.StatusBadRequest,
+			Message: "badly formed json provided.",
+		})
 		return
 	}
 
 	err := h.registerService.RegisterUser(h.db, user)
 	if err != nil {
 		if errors.Is(err, utils.ErrDuplicateUsername) {
-			c.JSON(http.StatusConflict, gin.H{"error": "username already exists"})
+			c.JSON(http.StatusConflict, utils.HTTPError{
+				Code:    http.StatusConflict,
+				Message: "username already exists",
+			})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to register user"})
+		c.JSON(http.StatusInternalServerError, utils.HTTPError{
+			Code:    http.StatusInternalServerError,
+			Message: "failed to register user",
+		})
 		return
 	}
-	c.JSON(http.StatusCreated, gin.H{"message": "user created successfully"})
+	c.JSON(http.StatusCreated, utils.MessageResponse{
+		Message: "user created successfully",
+	})
 }

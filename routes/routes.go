@@ -10,7 +10,7 @@ import (
 
 func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 
-	authHandler := handlers.NewAuthHandler(db, nil)
+	authHandler := handlers.NewAuthHandler(db, services.NewAuthService())
 	taskHandler := handlers.NewTaskHandler(db, nil)
 	refreshHandler := handlers.NewRefreshHandler(db, nil)
 	registerHandler := handlers.NewRegisterHandler(db, services.NewRegisterService())
