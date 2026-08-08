@@ -44,7 +44,7 @@ func (h *AuthHandler) Token(c *gin.Context) {
 		return
 	}
 
-	accessToken, refreshToken, err := h.authService.GenerateToken(h.db, user.ID)
+	accessToken, refreshToken, expirationTime, err := h.authService.GenerateToken(h.db, user.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, utils.HTTPError{
 			Code:    http.StatusInternalServerError,
@@ -57,6 +57,6 @@ func (h *AuthHandler) Token(c *gin.Context) {
 	c.JSON(http.StatusOK, utils.TokenResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
-		ExpiresIn:    3600,
+		ExpiresIn:    expirationTime,
 	})
 }
