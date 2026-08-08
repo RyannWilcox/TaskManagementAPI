@@ -38,3 +38,4 @@ services:
       - DB_PASSWORD=c6fec46d49164d95aa60d4d26fffc877
       - DB_NAME=taskmanager
       - JWT_SECRET=661227520dc859283b5f93b94ea7b8fcea611c1552b8122d8691e1b5849ad93f
+      - JWT_EXPIRATION=3600
