@@ -4,7 +4,6 @@ import (
 	"task-mgmt/models"
 
 	"github.com/gofrs/uuid"
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -18,9 +17,4 @@ type AuthServiceImpl struct {
 
 func NewAuthService() *AuthServiceImpl {
 	return &AuthServiceImpl{}
-}
-
-func VerifyPassword(hashedPassword, plainPassword string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(plainPassword))
-	return err == nil
 }

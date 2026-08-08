@@ -6,12 +6,11 @@ import (
 
 	"task-mgmt/models"
 	"task-mgmt/services"
+	"task-mgmt/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
-
-var ErrDuplicateUsername = errors.New("username already exists")
 
 type RegisterHandler struct {
 	db              *gorm.DB
@@ -32,7 +31,7 @@ func (h *RegisterHandler) Registration(c *gin.Context) {
 
 	err := h.registerService.RegisterUser(h.db, user)
 	if err != nil {
-		if errors.Is(err, ErrDuplicateUsername) {
+		if errors.Is(err, utils.ErrDuplicateUsername) {
 			c.JSON(http.StatusConflict, gin.H{"error": "username already exists"})
 			return
 		}
