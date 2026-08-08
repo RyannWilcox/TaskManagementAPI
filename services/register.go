@@ -1,8 +1,8 @@
 package services
 
 import (
-	"errors"
 	"task-mgmt/models"
+	"task-mgmt/utils"
 
 	"gorm.io/gorm"
 )
@@ -17,14 +17,21 @@ func NewRegisterService() *RegisterServiceImpl {
 	return &RegisterServiceImpl{}
 }
 
-// TODO: Need to implement password hashing and validation before storing the user in the database.
-
+// RegisterUser registers a new user in the database
 func (s *RegisterServiceImpl) RegisterUser(db *gorm.DB, user models.User) error {
 	// Check if the username already exists
 	var existingUser models.User
 	if err := db.Where("username = ?", user.Username).First(&existingUser).Error; err == nil {
-		return errors.New("username already exists")
+		return utils.ErrDuplicateUsername
 	}
+
+	hash, err := utils.HashPassword(user.Password)
+
+	if err != nil {
+		return err
+	}
+
+	user.Password = hash
 
 	// Create the new user
 	if err := db.Create(&user).Error; err != nil {
