@@ -39,4 +39,3 @@ services:
       - DB_NAME=taskmanager
       - JWT_SECRET=661227520dc859283b5f93b94ea7b8fcea611c1552b8122d8691e1b5849ad93f
       - JWT_EXPIRATION=3600 # 1 hour in seconds
-      - JWT_REFRESH_EXPIRATION=604800 # 7 days in seconds

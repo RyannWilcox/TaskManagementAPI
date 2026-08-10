@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"errors"
 	"net/http"
 
 	"task-mgmt/models"
@@ -25,26 +24,12 @@ func (h *RegisterHandler) Registration(c *gin.Context) {
 	// Implement the registration logic here
 	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, utils.HTTPError{
-			Code:    http.StatusBadRequest,
-			Message: "badly formed json provided.",
-		})
+		c.Error(err)
 		return
 	}
 
-	err := h.registerService.RegisterUser(h.db, user)
-	if err != nil {
-		if errors.Is(err, utils.ErrDuplicateUsername) {
-			c.JSON(http.StatusConflict, utils.HTTPError{
-				Code:    http.StatusConflict,
-				Message: "username already exists",
-			})
-			return
-		}
-		c.JSON(http.StatusInternalServerError, utils.HTTPError{
-			Code:    http.StatusInternalServerError,
-			Message: "failed to register user",
-		})
+	if err := h.registerService.RegisterUser(h.db, user); err != nil {
+		c.Error(err)
 		return
 	}
 	c.JSON(http.StatusCreated, utils.MessageResponse{

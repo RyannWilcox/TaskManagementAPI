@@ -38,7 +38,7 @@ func (s *AuthServiceImpl) LoginUser(db *gorm.DB, username, password string) (*mo
 
 // GenerateToken generates an access token and a refresh token for the given user ID.
 func (s *AuthServiceImpl) GenerateToken(db *gorm.DB, userID uuid.UUID, oldTokenID uuid.UUID) (string, string, error) {
-	accessToken, err := utils.GenerateAccessToken(userID)
+	accessToken, expirationTime, err := utils.GenerateAccessToken(userID)
 	if err != nil {
 		return "", "", err
 	}
@@ -50,7 +50,7 @@ func (s *AuthServiceImpl) GenerateToken(db *gorm.DB, userID uuid.UUID, oldTokenI
 	newToken := models.Token{
 		UserId:       userID,
 		RefreshToken: refreshToken,
-		ExpiresAt:    time.Now().Add(utils.GetRefreshExpiration()),
+		ExpiresAt:    time.Now().Add(expirationTime),
 	}
 
 	if oldTokenID != uuid.Nil {
