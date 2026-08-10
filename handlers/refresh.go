@@ -28,30 +28,21 @@ func (h *RefreshHandler) Refresh(c *gin.Context) {
 
 	var req RefreshRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, utils.HTTPError{
-			Code:    http.StatusBadRequest,
-			Message: "Invalid request payload",
-		})
+		c.Error(err)
 		return
 	}
 
 	// Validate the refresh token and get the associated user ID
 	oldRefreshToken, err := h.authService.ValidateRefreshToken(h.db, req.RefreshToken)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, utils.HTTPError{
-			Code:    http.StatusUnauthorized,
-			Message: "invalid or expired refresh token",
-		})
+		c.Error(err)
 		return
 	}
 
 	// Generate new access and refresh tokens for the user
 	accessToken, refreshToken, err := h.authService.GenerateToken(h.db, oldRefreshToken.UserId, oldRefreshToken.ID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, utils.HTTPError{
-			Code:    http.StatusInternalServerError,
-			Message: "failed to generate tokens",
-		})
+		c.Error(err)
 		return
 	}
 

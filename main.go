@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"task-mgmt/database"
+	"task-mgmt/middleware"
 	"task-mgmt/routes"
 	"time"
 
@@ -28,6 +29,8 @@ func main() {
 	r := gin.Default()
 
 	r.Use(gin.Recovery())
+	r.Use(middleware.ErrorHandler())
+	r.Use(middleware.RateLimiter())
 
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:8080", "http://host.docker.internal"},
@@ -39,14 +42,6 @@ func main() {
 	}))
 
 	routes.SetupRoutes(r, db)
-
-	/*
-		r.GET("/health", func(c *gin.Context) {
-			c.JSON(200, gin.H{
-				"status": "healthy",
-			})
-		})
-	*/
 
 	r.Run(":8080")
 }

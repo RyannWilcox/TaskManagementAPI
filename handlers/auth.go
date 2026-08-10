@@ -30,28 +30,19 @@ func (h *AuthHandler) Token(c *gin.Context) {
 	var auth AuthRequest
 
 	if err := c.ShouldBindJSON(&auth); err != nil {
-		c.JSON(http.StatusBadRequest, utils.HTTPError{
-			Code:    http.StatusBadRequest,
-			Message: "badly formed json provided.",
-		})
+		c.Error(err)
 		return
 	}
 
 	user, err := h.authService.LoginUser(h.db, auth.Username, auth.Password)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, utils.HTTPError{
-			Code:    http.StatusUnauthorized,
-			Message: "invalid username or password",
-		})
+		c.Error(err)
 		return
 	}
 
 	accessToken, refreshToken, err := h.authService.GenerateToken(h.db, user.ID, uuid.Nil)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, utils.HTTPError{
-			Code:    http.StatusInternalServerError,
-			Message: "failed to generate tokens",
-		})
+		c.Error(err)
 		return
 	}
 
