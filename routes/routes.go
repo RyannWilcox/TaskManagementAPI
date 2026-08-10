@@ -12,7 +12,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 
 	authHandler := handlers.NewAuthHandler(db, services.NewAuthService())
 	taskHandler := handlers.NewTaskHandler(db, nil)
-	refreshHandler := handlers.NewRefreshHandler(db, nil)
+	refreshHandler := handlers.NewRefreshHandler(db, services.NewAuthService())
 	registerHandler := handlers.NewRegisterHandler(db, services.NewRegisterService())
 	userHandler := handlers.NewUserHandler(db, nil)
 

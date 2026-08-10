@@ -4,8 +4,10 @@ import (
 	"net/http"
 	"task-mgmt/services"
 	"task-mgmt/utils"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gofrs/uuid"
 	"gorm.io/gorm"
 )
 
@@ -44,7 +46,7 @@ func (h *AuthHandler) Token(c *gin.Context) {
 		return
 	}
 
-	accessToken, refreshToken, expirationTime, err := h.authService.GenerateToken(h.db, user.ID)
+	accessToken, refreshToken, err := h.authService.GenerateToken(h.db, user.ID, uuid.Nil)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, utils.HTTPError{
 			Code:    http.StatusInternalServerError,
@@ -57,6 +59,6 @@ func (h *AuthHandler) Token(c *gin.Context) {
 	c.JSON(http.StatusOK, utils.TokenResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
-		ExpiresIn:    expirationTime,
+		ExpiresIn:    utils.GetEnvAsDuration("JWT_EXPIRATION", time.Hour),
 	})
 }
