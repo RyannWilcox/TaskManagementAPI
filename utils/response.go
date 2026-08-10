@@ -1,6 +1,8 @@
 // utils/response.go
 package utils
 
+import "time"
+
 // MessageResponse defines the structure for success messages
 type MessageResponse struct {
 	Message string `json:"message" example:"Media deleted"`
@@ -13,7 +15,7 @@ type HTTPError struct {
 }
 
 type TokenResponse struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-	ExpiresIn    int64  `json:"expires_in"`
+	AccessToken  string        `json:"access_token"`
+	RefreshToken string        `json:"refresh_token"`
+	ExpiresIn    time.Duration `json:"expires_in"`
 }

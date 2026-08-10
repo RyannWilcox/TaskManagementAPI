@@ -11,7 +11,8 @@ import (
 
 type AuthService interface {
 	LoginUser(db *gorm.DB, username, password string) (*models.User, error)
-	GenerateToken(db *gorm.DB, userID uuid.UUID) (string, string, int64, error)
+	GenerateToken(db *gorm.DB, userID uuid.UUID, oldTokenID uuid.UUID) (string, string, error)
+	ValidateRefreshToken(db *gorm.DB, refreshToken string) (*models.Token, error)
 }
 
 type AuthServiceImpl struct {
@@ -36,32 +37,47 @@ func (s *AuthServiceImpl) LoginUser(db *gorm.DB, username, password string) (*mo
 }
 
 // GenerateToken generates an access token and a refresh token for the given user ID.
-func (s *AuthServiceImpl) GenerateToken(db *gorm.DB, userID uuid.UUID) (string, string, int64, error) {
-	accessToken, expirationTime, err := utils.GenerateAccessToken(userID)
+func (s *AuthServiceImpl) GenerateToken(db *gorm.DB, userID uuid.UUID, oldTokenID uuid.UUID) (string, string, error) {
+	accessToken, err := utils.GenerateAccessToken(userID)
 	if err != nil {
-		return "", "", 0, err
+		return "", "", err
 	}
 	refreshToken, err := uuid.NewV4()
 	if err != nil {
-		return "", "", 0, err
+		return "", "", err
 	}
 
 	newToken := models.Token{
 		UserId:       userID,
 		RefreshToken: refreshToken,
-		ExpiresAt:    time.Now().Add(expirationTime),
+		ExpiresAt:    time.Now().Add(utils.GetRefreshExpiration()),
 	}
 
-	// Since this is a newly generated token,
-	// we should delete the users currently stored one
-	if err := db.Where("user_id = ?", userID).Delete(&models.Token{}).Error; err != nil {
-		return "", "", 0, err
+	if oldTokenID != uuid.Nil {
+		// we should delete the users currently stored one
+		if err := db.Where("id = ?", oldTokenID).Delete(&models.Token{}).Error; err != nil {
+			return "", "", err
+		}
 	}
 
 	// Create the new token record in the db.
 	if err := db.Create(&newToken).Error; err != nil {
-		return "", "", 0, err
+		return "", "", err
 	}
 
-	return accessToken, refreshToken.String(), int64(expirationTime.Seconds()), nil
+	return accessToken, refreshToken.String(), nil
+}
+
+// validates the provided refresh token and returns the associated user ID if valid.
+func (s *AuthServiceImpl) ValidateRefreshToken(db *gorm.DB, refreshToken string) (*models.Token, error) {
+	var token models.Token
+	if err := db.Where("refresh_token = ?", refreshToken).First(&token).Error; err != nil {
+		return nil, err
+	}
+
+	if time.Now().After(token.ExpiresAt) {
+		return nil, utils.ErrRefreshTokenExpired
+	}
+
+	return &token, nil
 }

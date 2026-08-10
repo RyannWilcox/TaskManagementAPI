@@ -20,7 +20,11 @@ func GetExpiration() time.Duration {
 	return GetEnvAsDuration("JWT_EXPIRATION", time.Hour)
 }
 
-func GenerateAccessToken(UserId uuid.UUID) (string, time.Duration, error) {
+func GetRefreshExpiration() time.Duration {
+	return GetEnvAsDuration("JWT_REFRESH_EXPIRATION", 7*24*time.Hour)
+}
+
+func GenerateAccessToken(UserId uuid.UUID) (string, error) {
 	expirationTime := GetExpiration()
 	currentTime := time.Now()
 	claims := &TokenClaims{
@@ -37,8 +41,8 @@ func GenerateAccessToken(UserId uuid.UUID) (string, time.Duration, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString(GetSecret())
 	if err != nil {
-		return "", 0, err
+		return "", err
 	}
 
-	return tokenString, expirationTime, nil
+	return tokenString, nil
 }
