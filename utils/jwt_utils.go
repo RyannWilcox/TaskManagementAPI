@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"strings"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -41,4 +42,32 @@ func GenerateAccessToken(UserId uuid.UUID) (string, time.Duration, error) {
 	}
 
 	return tokenString, expirationTime, nil
+}
+
+// Extracts the bearer token from the Authorization header,
+// validates its signature and expiry, and returns its claims.
+func ParseAndValidateToken(authHeader string) (*TokenClaims, error) {
+	if authHeader == "" {
+		return nil, ErrInvalidToken
+	}
+
+	parts := strings.SplitN(authHeader, " ", 2)
+	if len(parts) != 2 || !strings.EqualFold(parts[0], "Bearer") {
+		return nil, ErrInvalidToken
+	}
+	tokenString := parts[1]
+
+	claims := &TokenClaims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims,
+		func(t *jwt.Token) (interface{}, error) {
+			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, ErrInvalidSigningMethod
+			}
+			return GetSecret(), nil
+		})
+	if err != nil || !token.Valid {
+		return nil, ErrInvalidToken
+	}
+
+	return claims, nil
 }

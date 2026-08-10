@@ -2,6 +2,7 @@ package routes
 
 import (
 	"task-mgmt/handlers"
+	"task-mgmt/middleware"
 	"task-mgmt/services"
 
 	"github.com/gin-gonic/gin"
@@ -24,7 +25,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 			authRoutes.POST("/login", authHandler.Token)
 			authRoutes.POST("/refresh", refreshHandler.Refresh)
 		}
-		taskRoutes := v1.Group("/tasks")
+		taskRoutes := v1.Group("/tasks", middleware.RequireAuth())
 		{
 			taskRoutes.POST("", taskHandler.CreateTask)
 			taskRoutes.PUT("/:id", taskHandler.UpdateTask)
@@ -32,10 +33,10 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 			taskRoutes.GET("/:id", taskHandler.GetTaskByID)
 			taskRoutes.GET("", taskHandler.GetTasks)
 		}
-		userRoutes := v1.Group("/users")
+		userRoutes := v1.Group("/users", middleware.RequireAuth())
 		{
-			userRoutes.DELETE("/:user_id", userHandler.DeleteUser)
-			userRoutes.GET("", userHandler.GetUsers)
+			userRoutes.DELETE("/:user_id", middleware.RequireRole("admin"), userHandler.DeleteUser)
+			userRoutes.GET("", middleware.RequireRole("admin"), userHandler.GetUsers)
 			userRoutes.GET("/:user_id/tasks", taskHandler.GetTasksByUser)
 			userRoutes.GET("/profile", userHandler.GetUserProfile)
 			userRoutes.GET("/profile/:user_id", userHandler.GetUserProfileByUserId)
