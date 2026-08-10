@@ -30,7 +30,7 @@ func main() {
 
 	r.Use(gin.Recovery())
 	r.Use(middleware.ErrorHandler())
-	r.Use(middleware.RateLimitMiddleware())
+	r.Use(middleware.RateLimiter())
 
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:8080", "http://host.docker.internal"},

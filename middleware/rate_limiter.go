@@ -29,7 +29,7 @@ func getLimiter(ip string) *rate.Limiter {
 	return limiter
 }
 
-func RateLimitMiddleware() gin.HandlerFunc {
+func RateLimiter() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ip := getClientIP(c)
 		limiter := getLimiter(ip)
