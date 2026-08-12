@@ -32,6 +32,13 @@ func (s *RegisterServiceImpl) RegisterUser(db *gorm.DB, user models.User) error 
 	}
 
 	user.Password = hash
+	// Default role assignment for new users
+	var defaultRole models.Role
+	if err := db.Where("name = ?", "user").First(&defaultRole).Error; err != nil {
+		return err
+	}
+
+	user.Roles = []models.Role{defaultRole}
 
 	// Create the new user
 	if err := db.Create(&user).Error; err != nil {
