@@ -38,7 +38,12 @@ func (s *AuthServiceImpl) LoginUser(db *gorm.DB, username, password string) (*mo
 
 // GenerateToken generates an access token and a refresh token for the given user ID.
 func (s *AuthServiceImpl) GenerateToken(db *gorm.DB, userID uuid.UUID, oldTokenID uuid.UUID) (string, string, error) {
-	accessToken, expirationTime, err := utils.GenerateAccessToken(userID)
+	roles, permissions, err := s.getRolesAndPermissions(db, userID)
+	if err != nil {
+		return "", "", err
+	}
+
+	accessToken, expirationTime, err := utils.GenerateAccessToken(userID, roles, permissions)
 	if err != nil {
 		return "", "", err
 	}
@@ -80,4 +85,27 @@ func (s *AuthServiceImpl) ValidateRefreshToken(db *gorm.DB, refreshToken string)
 	}
 
 	return &token, nil
+}
+
+func (s *AuthServiceImpl) getRolesAndPermissions(db *gorm.DB, userID uuid.UUID) ([]string, []string, error) {
+	var user models.User
+	if err := db.Preload("Roles.Permissions").Where("id = ?", userID).First(&user).Error; err != nil {
+		return nil, nil, err
+	}
+
+	roles := make([]string, 0, len(user.Roles))
+	permissionSet := make(map[string]struct{})
+	for _, role := range user.Roles {
+		roles = append(roles, role.Name)
+		for _, permission := range role.Permissions {
+			permissionSet[permission.Resource+":"+permission.Action] = struct{}{}
+		}
+	}
+
+	permissions := make([]string, 0, len(permissionSet))
+	for permission := range permissionSet {
+		permissions = append(permissions, permission)
+	}
+
+	return roles, permissions, nil
 }

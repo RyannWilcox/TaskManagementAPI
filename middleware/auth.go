@@ -17,7 +17,10 @@ func RequireAuth() gin.HandlerFunc {
 			})
 			return
 		}
+		// Expose user id, roles, and permissions from the token
 		c.Set("userID", claims.UserId)
+		c.Set("userRoles", claims.Roles)
+		c.Set("userPermissions", claims.Permissions)
 		c.Next()
 	}
 }

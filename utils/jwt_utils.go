@@ -9,7 +9,9 @@ import (
 )
 
 type TokenClaims struct {
-	UserId uuid.UUID
+	UserId      uuid.UUID
+	Roles       []string
+	Permissions []string
 	jwt.RegisteredClaims
 }
 
@@ -21,11 +23,13 @@ func GetExpiration() time.Duration {
 	return GetEnvAsDuration("JWT_EXPIRATION", time.Hour)
 }
 
-func GenerateAccessToken(UserId uuid.UUID) (string, time.Duration, error) {
+func GenerateAccessToken(UserId uuid.UUID, Roles []string, Permissions []string) (string, time.Duration, error) {
 	expirationTime := GetExpiration()
 	currentTime := time.Now()
 	claims := &TokenClaims{
-		UserId: UserId,
+		UserId:      UserId,
+		Roles:       Roles,
+		Permissions: Permissions,
 		RegisteredClaims: jwt.RegisteredClaims{
 			IssuedAt:  jwt.NewNumericDate(currentTime),
 			ExpiresAt: jwt.NewNumericDate(currentTime.Add(expirationTime)),
