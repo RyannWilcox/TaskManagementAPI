@@ -30,15 +30,15 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 			taskRoutes.POST("", middleware.RequirePermission("tasks:create"), taskHandler.CreateTask)
 			taskRoutes.PUT("/:id", middleware.RequirePermission("tasks:update"), taskHandler.UpdateTask)
 			taskRoutes.DELETE("/:id", middleware.RequireRole("admin"), taskHandler.DeleteTask)
-			taskRoutes.GET("/:id", taskHandler.GetTaskByID)
-			taskRoutes.GET("", taskHandler.GetTasks)
+			taskRoutes.GET("/:id", middleware.RequirePermission("tasks:read"), taskHandler.GetTaskByID)
+			taskRoutes.GET("", middleware.RequirePermission("tasks:read"), taskHandler.GetTasks)
 		}
 		userRoutes := v1.Group("/users", middleware.RequireAuth())
 		{
 			userRoutes.DELETE("/:user_id", middleware.RequireRole("admin"), userHandler.DeleteUser)
 			userRoutes.GET("", middleware.RequireRole("admin"), userHandler.GetUsers)
-			userRoutes.GET("/:user_id/tasks", taskHandler.GetTasksByUser)
-			userRoutes.GET("/profile", userHandler.GetUserProfile)
+			userRoutes.GET("/:user_id/tasks", middleware.RequirePermission("tasks:read"), taskHandler.GetTasksByUser)
+			userRoutes.GET("/profile", middleware.RequirePermission("users:read"), userHandler.GetUserProfile)
 			userRoutes.GET("/profile/:user_id", middleware.RequirePermission("users:read"), userHandler.GetUserProfileByUserId)
 		}
 	}

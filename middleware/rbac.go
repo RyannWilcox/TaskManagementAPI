@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 	"slices"
 	"task-mgmt/utils"
@@ -12,8 +11,6 @@ import (
 func RequireRole(roles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userRoles, exists := c.Get("userRoles")
-		fmt.Println("userRoles:", userRoles)
-		fmt.Println("required roles:", roles)
 		if !exists || !isValid(userRoles.([]string), roles) {
 			c.AbortWithStatusJSON(http.StatusForbidden, utils.HTTPError{
 				Code:    http.StatusForbidden,
