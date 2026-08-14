@@ -1,3 +1,12 @@
+package models
+
+import (
+	"time"
+
+	"github.com/gofrs/uuid"
+	"gorm.io/gorm"
+)
+
 type Status string
 
 const (

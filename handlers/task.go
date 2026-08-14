@@ -1,12 +1,14 @@
 package handlers
 
 import (
-	"errors"
 	"net/http"
 
+	"task-mgmt/models"
 	"task-mgmt/services"
+	"task-mgmt/utils"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gofrs/uuid"
 	"gorm.io/gorm"
 )
 
@@ -20,9 +22,20 @@ func NewTaskHandler(db *gorm.DB, taskService services.TaskService) *TaskHandler 
 }
 
 func (h *TaskHandler) CreateTask(c *gin.Context) {
-	// Implement task creation logic here
+	var task models.Task
+	if err := c.ShouldBindJSON(&task); err != nil {
+		c.Error(err)
+		return
+	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "task created successfully"})
+	if err := h.taskService.CreateTask(h.db, task); err != nil {
+		c.Error(err)
+		return
+	}
+
+	c.JSON(http.StatusCreated, utils.MessageResponse{
+		Message: "task created successfully",
+	})
 }
 
 func (h *TaskHandler) UpdateTask(c *gin.Context) {
@@ -36,9 +49,23 @@ func (h *TaskHandler) DeleteTask(c *gin.Context) {
 	c.JSON(http.StatusNoContent, nil)
 }
 
+// Retrieve a task by a provided ID
 func (h *TaskHandler) GetTaskByID(c *gin.Context) {
+	taskID, err := uuid.FromString(c.Param("id"))
+	if err != nil {
+		c.Error(err)
+	}
 
-	c.JSON(http.StatusOK, "task by id")
+	// Get the currently logged in user off the context.
+	userID := c.MustGet("userID").(uuid.UUID)
+
+	task, err := h.taskService.GetTaskByID(h.db, taskID, userID)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	c.JSON(http.StatusOK, task)
 }
 
 func (h *TaskHandler) GetTasksByUser(c *gin.Context) {
@@ -49,16 +76,4 @@ func (h *TaskHandler) GetTasksByUser(c *gin.Context) {
 func (h *TaskHandler) GetTasks(c *gin.Context) {
 
 	c.JSON(http.StatusOK, "tasks list")
-}
-
-func handleTaskError(c *gin.Context, err error) {
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": "task not found",
-		})
-	} else {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "failed to process task request",
-		})
-	}
 }
