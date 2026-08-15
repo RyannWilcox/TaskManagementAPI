@@ -12,7 +12,7 @@ import (
 func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 
 	authHandler := handlers.NewAuthHandler(db, services.NewAuthService())
-	taskHandler := handlers.NewTaskHandler(db, nil)
+	taskHandler := handlers.NewTaskHandler(db, services.NewTaskService())
 	refreshHandler := handlers.NewRefreshHandler(db, services.NewAuthService())
 	registerHandler := handlers.NewRegisterHandler(db, services.NewRegisterService())
 	userHandler := handlers.NewUserHandler(db, nil)
@@ -27,19 +27,19 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 		}
 		taskRoutes := v1.Group("/tasks", middleware.RequireAuth())
 		{
-			taskRoutes.POST("", middleware.RequirePermission("tasks:create"), taskHandler.CreateTask)
-			taskRoutes.PUT("/:id", middleware.RequirePermission("tasks:update"), taskHandler.UpdateTask)
+			taskRoutes.POST("", middleware.RequirePermission("task:create"), taskHandler.CreateTask)
+			taskRoutes.PATCH("/:id", middleware.RequirePermission("task:update"), taskHandler.UpdateTask)
 			taskRoutes.DELETE("/:id", middleware.RequireRole("admin"), taskHandler.DeleteTask)
-			taskRoutes.GET("/:id", taskHandler.GetTaskByID)
-			taskRoutes.GET("", taskHandler.GetTasks)
+			taskRoutes.GET("/:id", middleware.RequirePermission("task:view"), taskHandler.GetTaskByID)
+			taskRoutes.GET("", middleware.RequireRole("admin"), taskHandler.GetTasks)
 		}
 		userRoutes := v1.Group("/users", middleware.RequireAuth())
 		{
 			userRoutes.DELETE("/:user_id", middleware.RequireRole("admin"), userHandler.DeleteUser)
 			userRoutes.GET("", middleware.RequireRole("admin"), userHandler.GetUsers)
-			userRoutes.GET("/:user_id/tasks", taskHandler.GetTasksByUser)
-			userRoutes.GET("/profile", userHandler.GetUserProfile)
-			userRoutes.GET("/profile/:user_id", middleware.RequirePermission("users:read"), userHandler.GetUserProfileByUserId)
+			userRoutes.GET("/:user_id/tasks", middleware.RequirePermission("task:view"), taskHandler.GetTasksByUser)
+			userRoutes.GET("/profile", middleware.RequirePermission("users:view"), userHandler.GetUserProfile)
+			userRoutes.GET("/profile/:user_id", middleware.RequirePermission("users:view"), userHandler.GetUserProfileByUserId)
 		}
 	}
 
