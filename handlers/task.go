@@ -39,14 +39,44 @@ func (h *TaskHandler) CreateTask(c *gin.Context) {
 }
 
 func (h *TaskHandler) UpdateTask(c *gin.Context) {
-	// Implement task update logic here
+	taskID, err := uuid.FromString(c.Param("id"))
+	if err != nil {
+		c.Error(err)
+		return
+	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "task updated successfully"})
+	var update models.TaskUpdate
+	if err := c.ShouldBindJSON(&update); err != nil {
+		c.Error(err)
+		return
+	}
+
+	userID := c.MustGet("userID").(uuid.UUID)
+
+	updatedTask, err := h.taskService.UpdateTask(h.db, taskID, userID, update)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	c.JSON(http.StatusOK, updatedTask)
 }
 
 func (h *TaskHandler) DeleteTask(c *gin.Context) {
+	taskID, err := uuid.FromString(c.Param("id"))
+	if err != nil {
+		c.Error(err)
+		return
+	}
 
-	c.JSON(http.StatusNoContent, nil)
+	if err := h.taskService.DeleteTask(h.db, taskID); err != nil {
+		c.Error(err)
+		return
+	}
+
+	c.JSON(http.StatusNoContent, utils.MessageResponse{
+		Message: "task deleted",
+	})
 }
 
 // Retrieve a task by a provided ID
@@ -54,6 +84,7 @@ func (h *TaskHandler) GetTaskByID(c *gin.Context) {
 	taskID, err := uuid.FromString(c.Param("id"))
 	if err != nil {
 		c.Error(err)
+		return
 	}
 
 	// Get the currently logged in user off the context.
@@ -69,11 +100,23 @@ func (h *TaskHandler) GetTaskByID(c *gin.Context) {
 }
 
 func (h *TaskHandler) GetTasksByUser(c *gin.Context) {
+	userID := c.MustGet("userID").(uuid.UUID)
 
-	c.JSON(http.StatusOK, "tasks list by user")
+	tasks, err := h.taskService.GetTasksByUser(h.db, userID)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	c.JSON(http.StatusOK, tasks)
 }
 
 func (h *TaskHandler) GetTasks(c *gin.Context) {
+	tasks, err := h.taskService.GetTasks(h.db)
 
-	c.JSON(http.StatusOK, "tasks list")
+	if err != nil {
+		c.Error(err)
+	}
+
+	c.JSON(http.StatusOK, tasks)
 }

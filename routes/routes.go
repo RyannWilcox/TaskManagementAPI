@@ -28,10 +28,10 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 		taskRoutes := v1.Group("/tasks", middleware.RequireAuth())
 		{
 			taskRoutes.POST("", middleware.RequirePermission("task:create"), taskHandler.CreateTask)
-			taskRoutes.PUT("/:id", middleware.RequirePermission("task:update"), taskHandler.UpdateTask)
+			taskRoutes.PATCH("/:id", middleware.RequirePermission("task:update"), taskHandler.UpdateTask)
 			taskRoutes.DELETE("/:id", middleware.RequireRole("admin"), taskHandler.DeleteTask)
 			taskRoutes.GET("/:id", middleware.RequirePermission("task:view"), taskHandler.GetTaskByID)
-			taskRoutes.GET("", middleware.RequirePermission("task:view"), taskHandler.GetTasks)
+			taskRoutes.GET("", middleware.RequireRole("admin"), taskHandler.GetTasks)
 		}
 		userRoutes := v1.Group("/users", middleware.RequireAuth())
 		{
