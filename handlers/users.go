@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"slices"
 	"task-mgmt/services"
 	"task-mgmt/utils"
 
@@ -57,8 +58,14 @@ func (h *UserHandler) GetUserProfileByUserId(c *gin.Context) {
 		return
 	}
 
+	// get context user id and roles
 	contextUserID := c.MustGet("userID").(uuid.UUID)
-	if contextUserID != paramID {
+	contextUserRoles := c.MustGet("userRoles").([]string)
+
+	// an admin can view any profile..
+	isAdmin := slices.Contains(contextUserRoles, "admin")
+
+	if contextUserID != paramID && !isAdmin {
 		c.Error(utils.ErrCannotViewProfile)
 		return
 	}
