@@ -15,7 +15,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	taskHandler := handlers.NewTaskHandler(db, services.NewTaskService())
 	refreshHandler := handlers.NewRefreshHandler(db, services.NewAuthService())
 	registerHandler := handlers.NewRegisterHandler(db, services.NewRegisterService())
-	userHandler := handlers.NewUserHandler(db, nil)
+	userHandler := handlers.NewUserHandler(db, services.NewUserService())
 
 	v1 := router.Group("/api/v1")
 	{
