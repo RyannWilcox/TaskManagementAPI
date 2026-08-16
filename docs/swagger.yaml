@@ -1,0 +1,506 @@
+basePath: /api/v1
+definitions:
+  handlers.AuthRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  handlers.RefreshRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  models.Permission:
+    properties:
+      action:
+        type: string
+      id:
+        type: string
+      resource:
+        type: string
+      roles:
+        items:
+          $ref: '#/definitions/models.Role'
+        type: array
+    type: object
+  models.Role:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      permissions:
+        items:
+          $ref: '#/definitions/models.Permission'
+        type: array
+    type: object
+  models.Status:
+    enum:
+    - pending
+    - in_progress
+    - completed
+    type: string
+    x-enum-varnames:
+    - Pending
+    - InProgress
+    - Completed
+  models.Task:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      status:
+        $ref: '#/definitions/models.Status'
+      title:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  models.TaskUpdate:
+    properties:
+      description:
+        type: string
+      status:
+        allOf:
+        - $ref: '#/definitions/models.Status'
+        enum:
+        - pending
+        - in_progress
+        - completed
+      title:
+        type: string
+    type: object
+  models.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      roles:
+        items:
+          $ref: '#/definitions/models.Role'
+        type: array
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
+  time.Duration:
+    enum:
+    - -9223372036854775808
+    - 9223372036854775807
+    - 1
+    - 1000
+    - 1000000
+    - 1000000000
+    - 60000000000
+    - 3600000000000
+    format: int64
+    type: integer
+    x-enum-varnames:
+    - minDuration
+    - maxDuration
+    - Nanosecond
+    - Microsecond
+    - Millisecond
+    - Second
+    - Minute
+    - Hour
+  utils.HTTPError:
+    properties:
+      code:
+        example: 400
+        type: integer
+      message:
+        example: Invalid input
+        type: string
+    type: object
+  utils.MessageResponse:
+    properties:
+      message:
+        example: Media deleted
+        type: string
+    type: object
+  utils.TokenResponse:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        $ref: '#/definitions/time.Duration'
+      refresh_token:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is a backend API for a task management system
+  title: Task Management API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user by username and password and issues an access/refresh
+        token pair.
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.AuthRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.TokenResponse'
+        "400":
+          description: invalid request payload
+          schema:
+            $ref: '#/definitions/utils.HTTPError'
+        "401":
+          description: invalid username or password
+          schema:
+            $ref: '#/definitions/utils.HTTPError'
+      summary: Log in and token generation
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Exchanges a valid, unexpired refresh token for a new access/refresh
+        token pair. The old refresh token is deleted (rotation).
+      parameters:
+      - description: Refresh token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.RefreshRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.TokenResponse'
+        "400":
+          description: invalid request payload
+          schema:
+            $ref: '#/definitions/utils.HTTPError'
+        "401":
+          description: invalid or expired refresh token
+          schema:
+            $ref: '#/definitions/utils.HTTPError'
+      summary: Refresh an access token
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user account and assigns the default "user" role
+      parameters:
+      - description: New user's username, email, and password
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/utils.MessageResponse'
+        "400":
+          description: invalid request payload
+          schema:
+            $ref: '#/definitions/utils.HTTPError'
+        "409":
+          description: username already exists
+          schema:
+            $ref: '#/definitions/utils.HTTPError'
+      summary: Register a new user
+      tags:
+      - auth
+  /tasks:
+    get:
+      description: Returns tasks
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Task'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: List tasks
+      tags:
+      - tasks
+    post:
+      consumes:
+      - application/json
+      description: Creates a new task
+      parameters:
+      - description: Task to create
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.Task'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Task'
+        "400":
+          description: invalid request payload
+          schema:
+            $ref: '#/definitions/utils.HTTPError'
+      security:
+      - BearerAuth: []
+      summary: Create a task
+      tags:
+      - tasks
+  /tasks/{id}:
+    delete:
+      description: Deletes a task by ID
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/utils.MessageResponse'
+        "400":
+          description: invalid task id
+          schema:
+            $ref: '#/definitions/utils.HTTPError'
+        "404":
+          description: record not found
+          schema:
+            $ref: '#/definitions/utils.HTTPError'
+      security:
+      - BearerAuth: []
+      summary: Delete a task
+      tags:
+      - tasks
+    get:
+      description: Returns a single task owned by the authenticated user
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Task'
+        "400":
+          description: invalid task id
+          schema:
+            $ref: '#/definitions/utils.HTTPError'
+        "404":
+          description: record not found
+          schema:
+            $ref: '#/definitions/utils.HTTPError'
+      security:
+      - BearerAuth: []
+      summary: Get a task by ID
+      tags:
+      - tasks
+    patch:
+      consumes:
+      - application/json
+      description: Updates one or more of title, description, and status on a task
+        owned by the authenticated user.
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Fields to update (all optional)
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.TaskUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Task'
+        "400":
+          description: invalid task id or invalid request payload
+          schema:
+            $ref: '#/definitions/utils.HTTPError'
+        "404":
+          description: record not found
+          schema:
+            $ref: '#/definitions/utils.HTTPError'
+      security:
+      - BearerAuth: []
+      summary: Partially update a task
+  /users:
+    get:
+      description: Returns every user in the system. Requires the "admin" role.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+        "403":
+          description: insufficient permissions
+          schema:
+            $ref: '#/definitions/utils.HTTPError'
+      security:
+      - BearerAuth: []
+      summary: List all users
+      tags:
+      - users
+  /users/{user_id}:
+    delete:
+      description: Deletes the specified user account. Requires the "admin" role.
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/utils.MessageResponse'
+        "400":
+          description: invalid user id
+          schema:
+            $ref: '#/definitions/utils.HTTPError'
+        "403":
+          description: insufficient permissions
+          schema:
+            $ref: '#/definitions/utils.HTTPError'
+        "404":
+          description: record not found
+          schema:
+            $ref: '#/definitions/utils.HTTPError'
+      security:
+      - BearerAuth: []
+      summary: Delete a user
+      tags:
+      - users
+  /users/{user_id}/tasks:
+    get:
+      description: Returns all tasks belonging to the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Task'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: List a user's tasks
+      tags:
+      - tasks
+  /users/profile:
+    get:
+      description: Returns the profile of the currently authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "401":
+          description: invalid or missing token
+          schema:
+            $ref: '#/definitions/utils.HTTPError'
+      security:
+      - BearerAuth: []
+      summary: Get the authenticated user's profile
+      tags:
+      - users
+  /users/profile/{user_id}:
+    get:
+      description: Returns the profile of the specified user. Requires the "user:view"
+        permission.
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: invalid user id
+          schema:
+            $ref: '#/definitions/utils.HTTPError'
+        "403":
+          description: insufficient permissions
+          schema:
+            $ref: '#/definitions/utils.HTTPError'
+        "404":
+          description: record not found
+          schema:
+            $ref: '#/definitions/utils.HTTPError'
+      security:
+      - BearerAuth: []
+      summary: Get a user's profile by ID
+      tags:
+      - users
+swagger: "2.0"
