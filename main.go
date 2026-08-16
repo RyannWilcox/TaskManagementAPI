@@ -9,6 +9,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// @title Task Management API
+// @version 1.0
+// @description This is a backend API for a task management system
+// @host localhost:8080
+// @BasePath /api/v1
+
 func main() {
 	dbConfig := database.NewDatabaseConfig()
 	db, err := dbConfig.Connect()
@@ -26,8 +32,6 @@ func main() {
 
 	r := gin.Default()
 	r.Use(middleware.SecurityHeaders())
-	r.Use(middleware.ErrorHandler())
-	r.Use(middleware.RateLimiter())
 
 	routes.SetupRoutes(r, db)
 

@@ -1,23 +1,31 @@
 package routes
 
 import (
+	"task-mgmt/docs"
 	"task-mgmt/handlers"
 	"task-mgmt/middleware"
 	"task-mgmt/services"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"gorm.io/gorm"
 )
 
 func SetupRoutes(router *gin.Engine, db *gorm.DB) {
-
 	authHandler := handlers.NewAuthHandler(db, services.NewAuthService())
 	taskHandler := handlers.NewTaskHandler(db, services.NewTaskService())
 	refreshHandler := handlers.NewRefreshHandler(db, services.NewAuthService())
 	registerHandler := handlers.NewRegisterHandler(db, services.NewRegisterService())
 	userHandler := handlers.NewUserHandler(db, services.NewUserService())
 
-	v1 := router.Group("/api/v1")
+	v1BasePath := "api/v1"
+
+	// Setup swagger documentation endpoint
+	docs.SwaggerInfo.BasePath = "/" + v1BasePath
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	v1 := router.Group(v1BasePath, middleware.ErrorHandler(), middleware.RateLimiter())
 	{
 		authRoutes := v1.Group("/auth")
 		{

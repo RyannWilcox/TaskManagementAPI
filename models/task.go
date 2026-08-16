@@ -30,7 +30,7 @@ type Task struct {
 type TaskUpdate struct {
 	Title       *string `json:"title"`
 	Description *string `json:"description"`
-	Status      *Status `json:"status"`
+	Status      *Status `json:"status" binding:"omitempty,oneof=pending in_progress completed"`
 }
 
 func (t *Task) BeforeCreate(tx *gorm.DB) (err error) {

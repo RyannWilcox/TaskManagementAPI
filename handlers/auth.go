@@ -25,7 +25,17 @@ func NewAuthHandler(db *gorm.DB, authService services.AuthService) *AuthHandler 
 	return &AuthHandler{db: db, authService: authService}
 }
 
-// Token handles user login and token generation
+// Token godoc
+// @Summary      Log in and token generation
+// @Description  Authenticates a user by username and password and issues an access/refresh token pair.
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        request  body      AuthRequest  true  "Login credentials"
+// @Success      200      {object}  utils.TokenResponse
+// @Failure      400      {object}  utils.HTTPError  "invalid request payload"
+// @Failure      401      {object}  utils.HTTPError  "invalid username or password"
+// @Router       /auth/login [post]
 func (h *AuthHandler) Token(c *gin.Context) {
 	var auth AuthRequest
 

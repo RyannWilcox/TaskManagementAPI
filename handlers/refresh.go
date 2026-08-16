@@ -24,6 +24,17 @@ func NewRefreshHandler(db *gorm.DB, authService services.AuthService) *RefreshHa
 	return &RefreshHandler{db: db, authService: authService}
 }
 
+// Refresh godoc
+// @Summary      Refresh an access token
+// @Description  Exchanges a valid, unexpired refresh token for a new access/refresh token pair. The old refresh token is deleted (rotation).
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        request  body      RefreshRequest  true  "Refresh token"
+// @Success      200      {object}  utils.TokenResponse
+// @Failure      400      {object}  utils.HTTPError  "invalid request payload"
+// @Failure      401      {object}  utils.HTTPError  "invalid or expired refresh token"
+// @Router       /auth/refresh [post]
 func (h *RefreshHandler) Refresh(c *gin.Context) {
 
 	var req RefreshRequest
