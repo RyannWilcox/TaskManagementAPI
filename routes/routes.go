@@ -46,8 +46,8 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 			userRoutes.DELETE("/:user_id", middleware.RequireRole("admin"), userHandler.DeleteUser)
 			userRoutes.GET("", middleware.RequireRole("admin"), userHandler.GetUsers)
 			userRoutes.GET("/:user_id/tasks", middleware.RequirePermission("task:view"), taskHandler.GetTasksByUser)
-			userRoutes.GET("/profile", middleware.RequirePermission("users:view"), userHandler.GetUserProfile)
-			userRoutes.GET("/profile/:user_id", middleware.RequirePermission("users:view"), userHandler.GetUserProfileByUserId)
+			userRoutes.GET("/profile", middleware.RequirePermission("user:view"), userHandler.GetUserProfile)
+			userRoutes.GET("/profile/:user_id", middleware.RequirePermission("user:view"), userHandler.GetUserProfileByUserId)
 		}
 	}
 

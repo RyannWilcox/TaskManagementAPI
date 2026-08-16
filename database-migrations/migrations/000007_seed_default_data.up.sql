@@ -35,4 +35,6 @@ INSERT INTO role_permissions(role_id, permission_id) VALUES
 ('b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e', '8ef9a912-88c1-4880-a324-7162cc62dc00'),
 ('b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e', '0a62f09c-4569-4c5e-ab60-cfde195c58d6'),
 ('b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e', '3d13adf7-7e8b-4c17-80df-2001ca91c598'),
-('b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e', '4a904b7f-cfb4-4a65-930c-47e81de0895e');
+('b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e', '4a904b7f-cfb4-4a65-930c-47e81de0895e'),
+('b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e', 'f65cd2d0-0275-4411-b5aa-828a2165d614'),
+('b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e', 'd04b1601-b21a-4704-a88c-ee7d796b2f75');

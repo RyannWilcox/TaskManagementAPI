@@ -9,4 +9,4 @@ CREATE TABLE users (
 );
 
 INSERT INTO users(id, username, email, password) VALUES 
-('bd006d41-aded-4040-9934-2ba4e909ef9a', 'admin', 'admin@gmail.com', '$2a$10$4DpVg6a3.jPMnkIx.U3R4exDtbr6ivuCS//cpYdHkJh4/txpop6ey');
+('bd006d41-aded-4040-9934-2ba4e909ef9a', 'admin', 'admin@gmail.com', '$2a$10$PZHhUlxVZk09ZsguiOyeeuIm31UZYSuZrWtq6CfVBg0/.Vm4BVm9m');
