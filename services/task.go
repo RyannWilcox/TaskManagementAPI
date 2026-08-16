@@ -8,7 +8,7 @@ import (
 )
 
 type TaskService interface {
-	CreateTask(db *gorm.DB, task models.Task) error
+	CreateTask(db *gorm.DB, task models.Task) (models.Task, error)
 	UpdateTask(db *gorm.DB, taskID uuid.UUID, userID uuid.UUID, update models.TaskUpdate) (models.Task, error)
 	DeleteTask(db *gorm.DB, taskID uuid.UUID) error
 	GetTaskByID(db *gorm.DB, taskID uuid.UUID, userID uuid.UUID) (models.Task, error)
@@ -23,54 +23,20 @@ func NewTaskService() *TaskServiceImpl {
 }
 
 // CreateTask implements [TaskService].
-func (t *TaskServiceImpl) CreateTask(db *gorm.DB, task models.Task) error {
-	// Begin the transaction
-	tx := db.Begin()
-
-	if tx.Error != nil {
-		return tx.Error
+func (t *TaskServiceImpl) CreateTask(db *gorm.DB, task models.Task) (models.Task, error) {
+	if err := db.Create(&task).Error; err != nil {
+		return models.Task{}, err
 	}
-
-	if err := tx.Create(&task).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	// Attempt to commit to the db.
-	if err := tx.Commit().Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-	return nil
+	return task, nil
 }
 
 // DeleteTask implements [TaskService].
 func (t *TaskServiceImpl) DeleteTask(db *gorm.DB, taskID uuid.UUID) error {
-	var task models.Task
-
-	if err := db.Where("id = ?").First(&task).Error; err != nil {
-		return err
+	result := db.Delete(&models.Task{}, "id = ?", taskID)
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
 	}
-
-	// begin the transaction
-	tx := db.Begin()
-
-	if tx.Error != nil {
-		return tx.Error
-	}
-
-	if err := tx.Delete(&task).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	// commit the deletion
-	if err := tx.Commit().Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	return nil
+	return result.Error
 }
 
 // GetTaskByID implements [TaskService].
