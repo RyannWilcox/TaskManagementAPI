@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"task-mgmt/models"
 
 	"github.com/gofrs/uuid"
@@ -10,7 +9,6 @@ import (
 
 type UserService interface {
 	GetUserProfile(db *gorm.DB, userID uuid.UUID) (models.User, error)
-	GetUserProfileMalicious(db *gorm.DB, userID string) ([]models.User, error)
 	GetUsers(db *gorm.DB) ([]models.User, error)
 	DeleteUser(db *gorm.DB, userId uuid.UUID) error
 }
@@ -20,18 +18,6 @@ type UserServiceImpl struct {
 
 func NewUserService() *UserServiceImpl {
 	return &UserServiceImpl{}
-}
-
-func (s *UserServiceImpl) GetUserProfileMalicious(db *gorm.DB, userID string) ([]models.User, error) {
-	var user []models.User
-
-	query := fmt.Sprintf("SELECT * FROM users WHERE id = '%s'", userID)
-	result := db.Raw(query).Scan(&user)
-
-	if result.Error != nil {
-		return []models.User{}, result.Error
-	}
-	return user, nil
 }
 
 func (s *UserServiceImpl) GetUserProfile(db *gorm.DB, userID uuid.UUID) (models.User, error) {

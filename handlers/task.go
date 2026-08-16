@@ -28,14 +28,13 @@ func (h *TaskHandler) CreateTask(c *gin.Context) {
 		return
 	}
 
-	if err := h.taskService.CreateTask(h.db, task); err != nil {
+	newTask, err := h.taskService.CreateTask(h.db, task)
+	if err != nil {
 		c.Error(err)
 		return
 	}
 
-	c.JSON(http.StatusCreated, utils.MessageResponse{
-		Message: "task created successfully",
-	})
+	c.JSON(http.StatusCreated, newTask)
 }
 
 func (h *TaskHandler) UpdateTask(c *gin.Context) {
@@ -51,6 +50,7 @@ func (h *TaskHandler) UpdateTask(c *gin.Context) {
 		return
 	}
 
+	// Get the currently logged in user off the context.
 	userID := c.MustGet("userID").(uuid.UUID)
 
 	updatedTask, err := h.taskService.UpdateTask(h.db, taskID, userID, update)
@@ -75,7 +75,7 @@ func (h *TaskHandler) DeleteTask(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusNoContent, utils.MessageResponse{
-		Message: "task deleted",
+		Message: "task succesfully deleted",
 	})
 }
 
@@ -100,6 +100,7 @@ func (h *TaskHandler) GetTaskByID(c *gin.Context) {
 }
 
 func (h *TaskHandler) GetTasksByUser(c *gin.Context) {
+	// Get the currently logged in user off the context.
 	userID := c.MustGet("userID").(uuid.UUID)
 
 	tasks, err := h.taskService.GetTasksByUser(h.db, userID)
