@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"slices"
 	"task-mgmt/services"
 	"task-mgmt/utils"
 
@@ -51,14 +52,20 @@ func (h *UserHandler) GetUserProfile(c *gin.Context) {
 // @Failure      404      {object}  utils.HTTPError  "record not found"
 // @Router       /users/profile/{user_id} [get]
 func (h *UserHandler) GetUserProfileByUserId(c *gin.Context) {
-	paramID, err := uuid.FromString(c.Param("id"))
+	paramID, err := uuid.FromString(c.Param("user_id"))
 	if err != nil {
 		c.Error(utils.ErrInvalidUUID)
 		return
 	}
 
+	// get context user id and roles
 	contextUserID := c.MustGet("userID").(uuid.UUID)
-	if contextUserID != paramID {
+	contextUserRoles := c.MustGet("userRoles").([]string)
+
+	// an admin can view any profile..
+	isAdmin := slices.Contains(contextUserRoles, "admin")
+
+	if contextUserID != paramID && !isAdmin {
 		c.Error(utils.ErrCannotViewProfile)
 		return
 	}
@@ -103,7 +110,7 @@ func (h *UserHandler) GetUsers(c *gin.Context) {
 // @Failure      404      {object}  utils.HTTPError  "record not found"
 // @Router       /users/{user_id} [delete]
 func (h *UserHandler) DeleteUser(c *gin.Context) {
-	userID, err := uuid.FromString(c.Param("id"))
+	userID, err := uuid.FromString(c.Param("user_id"))
 	if err != nil {
 		c.Error(utils.ErrInvalidUUID)
 		return

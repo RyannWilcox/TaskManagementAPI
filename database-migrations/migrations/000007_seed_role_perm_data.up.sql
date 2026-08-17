@@ -16,7 +16,9 @@ INSERT INTO roles(id, name) VALUES
 ('b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e', 'user');
 
 INSERT INTO user_roles(user_id, role_id) VALUES
-('bd006d41-aded-4040-9934-2ba4e909ef9a', 'a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d');
+('bd006d41-aded-4040-9934-2ba4e909ef9a', 'a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d'),
+('d8099de3-453b-49de-91bd-2dc498b852ff', 'b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e'),
+('447b4bb7-659f-423f-a6aa-098fdaee186e', 'b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e');
 
 INSERT INTO role_permissions(role_id, permission_id) VALUES
 -- admin permissions
@@ -35,4 +37,6 @@ INSERT INTO role_permissions(role_id, permission_id) VALUES
 ('b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e', '8ef9a912-88c1-4880-a324-7162cc62dc00'),
 ('b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e', '0a62f09c-4569-4c5e-ab60-cfde195c58d6'),
 ('b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e', '3d13adf7-7e8b-4c17-80df-2001ca91c598'),
-('b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e', '4a904b7f-cfb4-4a65-930c-47e81de0895e');
+('b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e', '4a904b7f-cfb4-4a65-930c-47e81de0895e'),
+('b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e', 'f65cd2d0-0275-4411-b5aa-828a2165d614'),
+('b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e', 'd04b1601-b21a-4704-a88c-ee7d796b2f75');
