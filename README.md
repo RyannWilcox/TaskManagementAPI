@@ -1,6 +1,6 @@
 # Task Management API
 
-A backend REST API for a task management system, built in Go with [Gin](https://github.com/gin-gonic/gin), [GORM](https://gorm.io/), and PostgreSQL. It provides user registration/authentication, JWT-based access and refresh tokens, role-based access control (RBAC), and CRUD operations for tasks.
+A backend REST API for a task management system, built in Go with [Gin](https://github.com/gin-gonic/gin), [GORM](https://gorm.io/), and PostgreSQL.
 
 > go udacity project #3
 
