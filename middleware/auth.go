@@ -11,6 +11,11 @@ func RequireAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		claims, err := utils.ParseAndValidateToken(c.GetHeader("Authorization"))
 		if err != nil {
+			logAccessDenied("Missing or invalid token", map[string]interface{}{
+				"error":  err,
+				"path":   c.Request.URL.Path,
+				"method": c.Request.Method,
+			})
 			c.AbortWithStatusJSON(http.StatusUnauthorized, utils.HTTPError{
 				Code:    http.StatusUnauthorized,
 				Message: "invalid or missing token",
