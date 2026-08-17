@@ -15,7 +15,6 @@ func RequireRole(roles ...string) gin.HandlerFunc {
 			logAccessDenied("Missing required role", map[string]interface{}{
 				"method":         c.Request.Method,
 				"path":           c.Request.URL.Path,
-				"roles":          userRoles.([]string),
 				"required_roles": roles,
 			})
 			c.AbortWithStatusJSON(http.StatusForbidden, utils.HTTPError{
@@ -35,7 +34,6 @@ func RequirePermission(permissions ...string) gin.HandlerFunc {
 			logAccessDenied("Missing required permissions", map[string]interface{}{
 				"method":         c.Request.Method,
 				"path":           c.Request.URL.Path,
-				"permissions":    userPermissions.([]string),
 				"required_perms": permissions,
 			})
 			c.AbortWithStatusJSON(http.StatusForbidden, utils.HTTPError{

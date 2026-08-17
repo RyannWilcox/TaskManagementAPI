@@ -23,7 +23,7 @@ func NewUserService() *UserServiceImpl {
 func (s *UserServiceImpl) GetUserProfile(db *gorm.DB, userID uuid.UUID) (models.User, error) {
 	var user models.User
 
-	result := db.Where("id = ?", userID).Find(&user)
+	result := db.Where("id = ?", userID).First(&user)
 	if result.Error != nil {
 		return models.User{}, result.Error
 	}
