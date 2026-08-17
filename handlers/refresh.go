@@ -36,7 +36,6 @@ func NewRefreshHandler(db *gorm.DB, authService services.AuthService) *RefreshHa
 // @Failure      401      {object}  utils.HTTPError  "invalid or expired refresh token"
 // @Router       /auth/refresh [post]
 func (h *RefreshHandler) Refresh(c *gin.Context) {
-
 	var req RefreshRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.Error(err)
